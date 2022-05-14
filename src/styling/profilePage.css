@@ -1,0 +1,8 @@
+.user-profile-data {
+  border: 1px solid black;
+  width: 30vw;
+  height: 15vh;
+  position: fixed;
+  left: 22vw;
+  top: 15vh;
+}

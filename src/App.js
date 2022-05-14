@@ -1,23 +1,75 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { Route, Routes, useNavigate, Link } from "react-router-dom";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import "firebase/compat/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
+import HomePage from "./pages/HomePage";
+import UserHomePage from "./pages/UserHomePage";
+import WordlePage from "./pages/WordlePage";
+import HighscoresPage from "./pages/HighscoresPage";
+import LoginPage from "./pages/LoginPage";
+
+firebase.initializeApp({
+  apiKey: "AIzaSyCDIPx5WJITZbyZkx1z-GsU1-jy_LDH2lE",
+  authDomain: "word-game-cd174.firebaseapp.com",
+  projectId: "word-game-cd174",
+  storageBucket: "word-game-cd174.appspot.com",
+  messagingSenderId: "243810594812",
+  appId: "1:243810594812:web:6a2b9a5600ca0ea9d68c79",
+});
+
+const auth = firebase.auth();
+const firestore = firebase.firestore();
 
 function App() {
+  const [user] = useAuthState(auth);
+  const navigate = useNavigate();
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Routes>
+        {user ? (
+          <>
+            <Route path="/home" element={<HomePage />} />
+            <Route
+              path={`/profile/${user.uid}`}
+              element={<UserHomePage user={user} firestore={firestore} />}
+            />
+            <Route
+              path="/wordle"
+              element={<WordlePage user={user} firestore={firestore} />}
+            />
+            <Route
+              path="/leaderboards"
+              element={<HighscoresPage user={user} firestore={firestore} />}
+            />
+          </>
+        ) : (
+          <Route
+            path="/login"
+            element={
+              <LoginPage
+                auth={auth}
+                nav={navigate}
+                usersRef={firestore.collection("users")}
+              />
+            }
+          />
+        )}
+      </Routes>
+      <div className="nav-links">
+        {user ? (
+          <>
+            <Link to="/home">Home</Link>
+            <Link to={`/profile/${user.uid}`}>My Profile</Link>
+            <Link to="/wordle">Wordle</Link>
+            <Link to="/leaderboards">Leaderboards</Link>
+          </>
+        ) : (
+          <Link to="/login">Log In</Link>
+        )}
+      </div>
     </div>
   );
 }
