@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { WORDLE } from "../data/WORDLE.js";
 import { WORDLE_ACC } from "../data/WORDLE_ACC";
+import '../styling/wordlePage.css';
 import getCorrectArray from "../functions/getCorrectArray";
 import Guess from "../components/Guess";
 import EndScreen from "../components/EndScreen";
@@ -101,15 +102,15 @@ const GuessingGame = (props) => {
     if (guess.length > 5) {
       setGuess(guess.substring(0, 5));
     }
-
-    if (
-      guess[0] &&
-      guess[guess.length - 1] === guess[guess.length - 1].toLowerCase()
-    ) {
-      let char = guess[guess.length - 1].toUpperCase();
-      setGuess(guess.substring(0, guess.length - 1) + char);
-    }
     let guessArr = guess.split("");
+    for (let i=0; i<guessArr.length; i++) {
+      if (guessArr[i].toLowerCase() === guessArr[i]) {
+        guessArr[i] = guessArr[i].toUpperCase();
+      }
+    }
+    if (guessArr.join('') !== guess) {
+      setGuess(guessArr.join(''));
+    }
     if (!valid.includes(guessArr[guessArr.length - 1])) {
       setGuess(guess.substring(0, guessArr.length - 1));
     }
@@ -241,7 +242,6 @@ const GuessingGame = (props) => {
         <button onClick={() => makeGuess()}>Enter</button>
       </div>
       <p>{guess}</p>
-
       <section className="guesses">
         {guesses.length > 0 &&
           guesses.map((g) => (
