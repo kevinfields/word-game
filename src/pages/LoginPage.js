@@ -22,6 +22,9 @@ const LoginPage = (props) => {
         email: user.email,
         photoURL: user.photoURL,
         id: user.uid,
+        badges: [],
+        completed: 0,
+        highscores: 0,
       });
     }
   };

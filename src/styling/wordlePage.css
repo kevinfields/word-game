@@ -196,3 +196,12 @@
   left: 25vw;
   bottom: 5vh;
 }
+
+.new-badge-alert {
+  width: 20vw;
+  height: 20vh;
+  border: 1px solid red;
+  position: fixed;
+  left: 50vw;
+  top: 15vh;
+}

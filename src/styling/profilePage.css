@@ -6,3 +6,25 @@
   left: 22vw;
   top: 15vh;
 }
+
+.user-badges {
+  width: 30vw;
+  height: 15vh;
+  position: fixed;
+  left: 54vw;
+  top: 15vh;
+  border: 1px solid blue;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow: scroll;
+  gap: 0.5vh;
+  padding: 0.5vh;
+}
+
+.badge {
+  width: 6vw;
+  height: 5vh;
+  border: 1px solid red;
+  font-size: 10pt;
+}
