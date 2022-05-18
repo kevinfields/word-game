@@ -33,7 +33,7 @@ const UploadGGScore = (props) => {
               .collection("wordle-scores")
               .add(hsObject)
               .then(() => {
-                navigate("/leaderboards");
+                navigate("/leaderboards/timed");
               });
           } else {
             alert(
@@ -46,7 +46,7 @@ const UploadGGScore = (props) => {
             .collection("wordle-scores")
             .add(hsObject)
             .then(() => {
-              navigate("/leaderboards");
+              navigate("/leaderboards/timed");
             });
         }
       });

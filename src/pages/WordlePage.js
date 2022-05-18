@@ -11,6 +11,8 @@ import NavButton from "../components/NavButton";
 import BadgeAlert from "../components/BadgeAlert.js";
 import ADD_BADGE from "../reducers/ADD_BADGE.js";
 import ADD_COMPLETED from "../reducers/ADD_COMPLETED.js";
+import ADD_BADGES from "../reducers/ADD_BADGES.js";
+import UploadGGFTScore from "../components/UploadGGFTScore.js";
 
 const valid = [
   "A",
@@ -71,6 +73,7 @@ const GuessingGame = (props) => {
   const [guess, setGuess] = useState("");
   const [guesses, setGuesses] = useState([]);
   const [allowUpload, setAllowUpload] = useState(false);
+  const [allowFTUpload, setAllowFTUpload] = useState(false);
   const [date, setDate] = useState({});
   const [correct, setCorrect] = useState(
     WORDLE[Math.floor(Math.random() * WORDLE.length)].toUpperCase()
@@ -122,10 +125,14 @@ const GuessingGame = (props) => {
         });
       })
       scoreCatcher.sort((a, b) => a.data.time - b.data.time);
-      if (time < scoreCatcher[9].data.time) {
+      if (time < scoreCatcher[9].data.time && time !== 0) {
         setAllowUpload(true);
         setDate(new Date());
         addHighscoreBadge();
+      } else if (time === 0) {
+        setAllowUpload(false);
+        setAllowFTUpload(true);
+        setDate(new Date());
       } else {
         setAllowUpload(false);
       }
@@ -142,21 +149,21 @@ const GuessingGame = (props) => {
           open: true,
           text: 'Novice Player',
         })
-        await ADD_BADGE('Novice Player', userRef);
+        await ADD_BADGE( userRef, 'Novice Player');
         break;
       case 100: 
         setBadgeAlert({
           open: true,
           text: 'Intermediate Player',
         })
-        await ADD_BADGE('Intermediate Player', userRef);
+        await ADD_BADGE(userRef, 'Intermediate Player');
         break;
       case 500:
         setBadgeAlert({
           open: true,
           text: 'Expert Player'
         })
-        await ADD_BADGE('Expert Player', userRef);
+        await ADD_BADGE(userRef, 'Expert Player');
         break;
       default:
         break;
@@ -164,16 +171,11 @@ const GuessingGame = (props) => {
   }
 
   const addHighscoreBadge = async () => {
-    await ADD_BADGE('Highscore', userRef);
+    await ADD_BADGE(userRef, 'Highscore');;
     setBadgeAlert({
       open: true,
       text: 'Highscore',
     })
-  }
-
-  const addQBadge = async () => {
-    
-    await ADD_BADGE('Word with Q', userRef);
   }
 
   useEffect(() => {
@@ -196,9 +198,6 @@ const GuessingGame = (props) => {
     if (guessArr.join('') !== guess) {
       setGuess(guessArr.join(''));
     }
-    if (!valid.includes(guessArr[guessArr.length - 1])) {
-      setGuess(guess.substring(0, guessArr.length - 1));
-    }
   }, [guess]);
 
   useEffect(() => {
@@ -220,27 +219,56 @@ const GuessingGame = (props) => {
   }, [guesses]);
 
   useEffect(() => {
-    if (endScreen.allow) {
-      if (props.user && props.firestore) {
+    console.log('.guesses: ' + endScreen.guesses)
+    if (endScreen.allow && props.user && props.firestore) {
         checkHighscore(endScreen.time);
         markCompleted();
+      if (endScreen.word.split('').includes('Q')) {
+        ADD_BADGE('Word with Q', userRef).then(() => {
+          setBadgeAlert({
+            open: true,
+            text: 'Word with Q', 
+          })
+        })
       }
-      markCompleted();
-    }
-    if (endScreen.word.split('').includes('Q')) {
-      ADD_BADGE(userRef, 'Word with Q');
-      setBadgeAlert({
-        open: true,
-        text: 'Word with Q', 
-      })
-    }
-
-    if (endScreen.guesses < 3) {
-      ADD_BADGE(userRef, 'Three or Less');
-      setBadgeAlert({
-        open: true,
-        text: 'Three or Less'
-      })
+      if (endScreen.word.split('').includes('Z')) {
+        ADD_BADGE('Word with Z', userRef).then(() => {
+          setBadgeAlert({
+            open: true,
+            text: 'Word with Z',
+          })
+        })
+      }
+      if (endScreen.word.split('').includes('X')) {
+        ADD_BADGE(userRef, 'Word with X').then(() => {
+          setBadgeAlert({
+            open: true,
+            text: 'Word with X',
+          })
+        })
+      }
+      if (endScreen.guesses.length === 0) {
+        ADD_BADGES(userRef, 'First Try', 'Two or Less', 'Three or Less').then(() => {
+          setBadgeAlert({
+            open: true,
+            text: 'First Try, Two or Less, and Three or Less',
+          })
+        });
+      } else if (endScreen.guesses.length <= 1 && endScreen.guesses.length > 0) {
+        ADD_BADGES(userRef, 'Two or Less', 'Three or Less').then(() => {
+          setBadgeAlert({
+            open: true,
+            text: 'Two or Less and Three or Less',
+          })
+        });
+      } else if (endScreen.guesses.length <= 2 && endScreen.guesses.length > 0) {
+        ADD_BADGE(userRef, 'Three or Less').then(() => {
+          setBadgeAlert({
+            open: true,
+            text: 'Three or Less',
+          })
+        })
+      }
     }
   }, [endScreen]);
 
@@ -278,7 +306,7 @@ const GuessingGame = (props) => {
         success: true,
         word: correct,
         guesses: guesses,
-        time: (new Date() - time) / 1000,
+        time: guesses.length > 0 ? ((new Date() - time) / 1000) : 0,
         allow: true,
       });
       setGuesses([]);
@@ -319,6 +347,10 @@ const GuessingGame = (props) => {
     });
     setAllowUpload(false);
   };
+
+  useEffect(() => {
+    console.log('correct: ' + correct);
+  }, [correct])
 
   return (
     <div className="page">
@@ -363,7 +395,16 @@ const GuessingGame = (props) => {
             date={date}
           />
         </>
-      ) : null}
+      ) : allowFTUpload ? 
+        <>
+          <UploadGGFTScore
+            user={props.user}
+            firestore={props.firestore}
+            results={endScreen}
+            date={date}
+          />
+        </>
+        : null}
       {!endScreen.open ? (
         <section className="guessing-screen">
           <GuessScreen word={correct} guesses={guesses} />
@@ -371,7 +412,7 @@ const GuessingGame = (props) => {
       ) :
       <>
       <NavButton
-        route={"/leaderboards"}
+        route={"/leaderboards/timed"}
         display={"See Highscores"}
         css={"nav-button-gg-hs"}
       />

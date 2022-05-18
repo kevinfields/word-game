@@ -1,6 +1,5 @@
 
-
-export default async function ADD_BADGE (badge, userRef) {
+export default async function ADD_BADGE (userRef, badge) {
 
   let data;
   await userRef.get().then(doc => {

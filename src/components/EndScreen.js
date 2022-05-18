@@ -13,12 +13,12 @@ const EndScreen = (props) => {
         <p className="gg-correct-guess">{props.correct}</p>
       </div>
       <div className="gg-end-screen-extras">
-        <button
+        {/* <button
           onClick={() => props.closeScreen()}
           className="close-gg-end-screen"
         >
           X
-        </button>
+        </button> */}
         <p className="gg-end-screen-time">{props.time} seconds</p>
       </div>
     </div>

@@ -41,8 +41,12 @@ function App() {
               element={<WordlePage user={user} firestore={firestore} />}
             />
             <Route
-              path="/leaderboards"
-              element={<HighscoresPage user={user} firestore={firestore} />}
+              path="/leaderboards/timed"
+              element={<HighscoresPage user={user} firestore={firestore} mode={'timed'}/> }
+            />
+            <Route
+              path='/leaderboards/first-tries'
+              element={<HighscoresPage user={user} firestore={firestore} mode={'first tries'} />} 
             />
           </>
         ) : (
@@ -64,7 +68,7 @@ function App() {
             <Link to="/home">Home</Link>
             <Link to={`/profile/${user.uid}`}>My Profile</Link>
             <Link to="/wordle">Wordle</Link>
-            <Link to="/leaderboards">Leaderboards</Link>
+            <Link to="/leaderboards/timed">Leaderboards</Link>
           </>
         ) : (
           <Link to="/login">Log In</Link>
