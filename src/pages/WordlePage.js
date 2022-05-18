@@ -136,6 +136,8 @@ const GuessingGame = (props) => {
       } else {
         setAllowUpload(false);
       }
+    }).catch(err => {
+      console.log(err)
     })
   }
 

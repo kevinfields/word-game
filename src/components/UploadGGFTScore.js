@@ -13,7 +13,9 @@ const UploadGGFTScore = (props) => {
       userName: props.user.displayName,
     };
     await props.firestore.collection("first-tries").add(hsObject).then(() => {
-      navigate("/leaderboards/first-try");
+      navigate("/leaderboards/first-tries");
+    }).catch(err => {
+      console.log(err)
     });
   };
 
