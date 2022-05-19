@@ -88,6 +88,8 @@ const GuessingGame = (props) => {
   });
   const [badgeAlert, setBadgeAlert] = useState({
     open: false,
+    badges: [],
+    plural: false,
     text: '',
   })
 
@@ -110,7 +112,8 @@ const GuessingGame = (props) => {
     setAllowUpload(false);
     setBadgeAlert({
       open: false,
-      text: '',
+      badges: [],
+      plural: false,
     })
   };
 
@@ -147,24 +150,15 @@ const GuessingGame = (props) => {
     console.log(completed)
     switch (completed) {
       case 1:
-        setBadgeAlert({
-          open: true,
-          text: 'Novice Player',
-        })
+        addBadgeAlert('Novice Player');
         await ADD_BADGE( userRef, 'Novice Player');
         break;
       case 100: 
-        setBadgeAlert({
-          open: true,
-          text: 'Intermediate Player',
-        })
+        addBadgeAlert('Intermediate Player');
         await ADD_BADGE(userRef, 'Intermediate Player');
         break;
       case 500:
-        setBadgeAlert({
-          open: true,
-          text: 'Expert Player'
-        })
+        addBadgeAlert('Expert Player');
         await ADD_BADGE(userRef, 'Expert Player');
         break;
       default:
@@ -174,10 +168,26 @@ const GuessingGame = (props) => {
 
   const addHighscoreBadge = async () => {
     await ADD_BADGE(userRef, 'Highscore');;
-    setBadgeAlert({
-      open: true,
-      text: 'Highscore',
-    })
+    addBadgeAlert('Highscore')
+  }
+
+  const addBadgeAlert = (badge) => {
+    let current = badgeAlert.badges;
+    current.push(badge);
+
+    if (badgeAlert.badges.length === 0) {
+      setBadgeAlert({
+        open: true,
+        badges: [badge],
+        plural: false,
+      })
+    } else {
+      setBadgeAlert({
+        open: true,
+        badges: current,
+        plural: true,
+      })
+    }
   }
 
   useEffect(() => {
@@ -222,54 +232,63 @@ const GuessingGame = (props) => {
 
   useEffect(() => {
     console.log('.guesses: ' + endScreen.guesses)
+    // this useEffect is intended to give the user badges based on the results of the game,
+    // stored in the endScreen variable.
+
     if (endScreen.allow && props.user && props.firestore) {
         checkHighscore(endScreen.time);
         markCompleted();
+      // check for words with Q, X, or Z
       if (endScreen.word.split('').includes('Q')) {
         ADD_BADGE('Word with Q', userRef).then(() => {
-          setBadgeAlert({
-            open: true,
-            text: 'Word with Q', 
-          })
+          addBadgeAlert('Word with Q');
         })
       }
       if (endScreen.word.split('').includes('Z')) {
         ADD_BADGE('Word with Z', userRef).then(() => {
-          setBadgeAlert({
-            open: true,
-            text: 'Word with Z',
-          })
+          addBadgeAlert('Word with Z');
         })
       }
       if (endScreen.word.split('').includes('X')) {
         ADD_BADGE(userRef, 'Word with X').then(() => {
-          setBadgeAlert({
-            open: true,
-            text: 'Word with X',
-          })
+          addBadgeAlert('Word with X');
         })
       }
-      if (endScreen.guesses.length === 0) {
-        ADD_BADGES(userRef, 'First Try', 'Two or Less', 'Three or Less').then(() => {
-          setBadgeAlert({
-            open: true,
-            text: 'First Try, Two or Less, and Three or Less',
-          })
-        });
-      } else if (endScreen.guesses.length <= 1 && endScreen.guesses.length > 0) {
-        ADD_BADGES(userRef, 'Two or Less', 'Three or Less').then(() => {
-          setBadgeAlert({
-            open: true,
-            text: 'Two or Less and Three or Less',
-          })
-        });
-      } else if (endScreen.guesses.length <= 2 && endScreen.guesses.length > 0) {
-        ADD_BADGE(userRef, 'Three or Less').then(() => {
-          setBadgeAlert({
-            open: true,
-            text: 'Three or Less',
-          })
+      // check for 10 seconds or less (but greater than 0 (first try))
+      if (endScreen.time > 0 && endScreen.time < 5) {
+        ADD_BADGES(userRef, 'Under 5 Seconds', 'Under 10 Seconds').then(() => {
+          addBadgeAlert('Under 5 Seconds');
         })
+      }
+      if (endScreen.time > 0 && endScreen.time < 10) {
+        ADD_BADGE(userRef, 'Under 10 Seconds').then(() => {
+          addBadgeAlert('Under 10 Seconds')
+        })
+      }
+
+      //give a badge if 4 guesses or less
+      
+      
+      
+      if (endScreen.guesses.length <=3 && endScreen.guesses.length > 0) {
+        ADD_BADGE(userRef, 'Four or Less').then(() => {
+          addBadgeAlert('Four or Less');
+        })
+        if (endScreen.guesses.length <= 2 && endScreen.guesses.length > 0) {
+          ADD_BADGES(userRef, 'Three or Less', 'Four or Less').then(() => {
+            addBadgeAlert('Three or Less');
+          })
+          if (endScreen.guesses.length <= 1 && endScreen.guesses.length > 0) {
+            ADD_BADGES(userRef, 'Two or Less', 'Three or Less', 'Four or Less').then(() => {
+              addBadgeAlert('Two or Less');
+            });
+            if (endScreen.guesses.length === 0) {
+              ADD_BADGES(userRef, 'First Try', 'Two or Less', 'Three or Less', 'Four or Less').then(() => {
+                addBadgeAlert('First Try')
+              });
+            }
+          }
+        }
       }
     }
   }, [endScreen]);
@@ -423,9 +442,10 @@ const GuessingGame = (props) => {
       </div>
       </> }
       {badgeAlert.open ? 
-      <BadgeAlert text={badgeAlert.text} onClose={() => setBadgeAlert({
+      <BadgeAlert badges={badgeAlert.badges} plural={badgeAlert.badges.length > 1} onClose={() => setBadgeAlert({
         open: false,
-        text: '',
+        badges: [],
+        plural: false,
       })}/>
       : null}
     </div>

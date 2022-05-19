@@ -204,4 +204,17 @@
   position: fixed;
   left: 50vw;
   top: 15vh;
+  text-align: center;
+}
+
+.close-badge-alert {
+  position: relative;
+  left: 8vw;
+  bottom: 19vh;
+  width: 2vw;
+  height: 2vw;
+}
+
+.badge-alert-text {
+  line-height: 4vh;
 }
